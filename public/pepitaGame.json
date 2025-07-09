@@ -1,0 +1,21 @@
+{
+  "sources": [
+    {
+      "name": "pgmPepitaGame.wpgm",
+      "content": "import alpiste.*\nprogram pepitaGame {game.sound('game.addVisual(alpiste);game.start();}"
+    },
+    {
+      "name": "alpiste.wlk",
+      "content": "object alpiste {\nvar property position = game.at(5,5)\nmethod image() = \"alpiste.png\"\nmethod energia() = 5\n}"
+    }
+  ],
+  "main": "pgmPepitaGame",
+  "description": "A Game",
+  "images": [
+    {
+      "possiblePaths": ["alpiste.png", "assets/alpiste.png"],
+      "url": "https://github.com/wollok/pepitaGame/raw/refs/heads/master/assets/alpiste.png"
+    }
+  ],
+  "sounds": []
+}
