@@ -95,7 +95,7 @@ function filesWithExtension(files: Tree, baseUrl: string, validExtensions: strin
     .filter(file => validExtensions.some(ext => file.path.endsWith(`.${ext}`)))
     .map(file => ({
       possiblePaths: [file.path, file.path.split('/').pop()!],
-      url: file.url || `${baseUrl}/${file.path}`
+      url: `${baseUrl}/${file.path}` //|| file.url 
     }));
 }
 
