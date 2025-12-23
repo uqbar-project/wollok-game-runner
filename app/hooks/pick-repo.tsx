@@ -119,8 +119,16 @@ function toMediaBase64File(mimeType: string) {
       throw new Error(`Expected file but got ${file.data.type} for file ${_path}`);
     }
 
+    // If the file is not base64 encoded, we are probably a large file
+    // so we try to salvage the situation by passing in the download_url
     if(file.data.encoding !== 'base64'){
-      throw new Error(`Expected base64 encoding but got ${file.data.encoding} for file ${_path}`);
+      if(!file.data.download_url){
+        throw new Error(`Expected download_url for non-base64 file ${_path}`);
+      }
+      return {
+        possiblePaths: [file.data.name, file.data.path],
+        url: file.data.download_url
+      }
     }
 
     return {
