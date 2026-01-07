@@ -1,127 +1,179 @@
-import { useEffect, forwardRef, useImperativeHandle } from "react";
-import { Formik, Form, Field } from 'formik';
-import type { FormikBag, FormikHelpers, FormikProps } from 'formik';
-
+import {
+  Button,
+  CardBody,
+  CardRoot,
+  Field as ChakraField,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import type { FieldProps, FormikHelpers, FormikProps } from 'formik'
+import { Field, Form, Formik } from 'formik'
+import { useState } from 'react'
+import { BsRocketTakeoff } from 'react-icons/bs'
+import * as Yup from 'yup'
 interface ProjectSettings {
-  name: string;
-  owner: string;
-  branch: string;
-  main: string;
+  name: string
+  owner: string
+  branch: string
+  main: string
 }
 
 interface FormValues {
-  repoUrl: string;
-  branch: string;
-  main: string;
+  repoUrl: string
+  branch: string
+  main: string
 }
 
 interface PickGameFormProps {
-  onSubmit?: (settings: ProjectSettings, formikBag: FormikHelpers<FormValues>) => void;
+  onSubmit?: (
+    settings: ProjectSettings,
+    formikBag: FormikHelpers<FormValues>
+  ) => void
 }
 
-const PickGameForm = ({ onSubmit }: PickGameFormProps) => {
-  const parseGitHubUrl = (url: string) => {
-    try {
-      const githubRegex = /github\.com\/([^\/]+)\/([^\/]+)/;
-      const match = url.match(githubRegex);
-      
-      if (match) {
-        const owner = match[1];
-        const repo = match[2].replace(/\.git$/, '');
-        return { owner, name: repo };
-      }
-    } catch (error) {
-      // Handle error silently
-    }
-    return { owner: '', name: '' };
-  };
-
-  const initialValues: FormValues = {
+export default ({ onSubmit }: PickGameFormProps) => {
+  // const initialValues: FormValues = {
+  //   repoUrl: 'https://github.com/wollok/pepitaGame',
+  //   branch: 'master',
+  //   main: 'pgmPepitaGame'
+  // };
+  const [initialValues, setInitialValues] = useState<FormValues>({
     repoUrl: 'https://github.com/pdepjm/2024-o-tpjuego-bestiasalgoritmicas',
     branch: 'main',
-    main: 'mainStickyBlocks'
-  };
+    main: 'mainStickyBlocks',
+  })
 
-  const handleSubmit = (values: FormValues, formikBag: FormikHelpers<FormValues>) => {
-    const { owner, name } = parseGitHubUrl(values.repoUrl);
-    
-    if (name && owner && values.branch) {
-      const settings: ProjectSettings = {
-        name,
-        owner,
-        branch: values.branch,
-        main: values.main
-      };
-      onSubmit?.(settings, formikBag);
+  const handleSubmit = (
+    values: FormValues,
+    formikBag: FormikHelpers<FormValues>
+  ) => {
+    const { owner, name } = parseGitHubUrl(values.repoUrl)
+    const settings: ProjectSettings = {
+      name,
+      owner,
+      branch: values.branch,
+      main: values.main,
     }
-  };
+    onSubmit?.(settings, formikBag)
+    setInitialValues({ ...initialValues })
+  }
 
   return (
-    <Formik
+    <Formik<FormValues>
       initialValues={initialValues}
       onSubmit={handleSubmit}
-
+      validationSchema={validationSchema}
     >
-      {({ values, resetForm }: FormikProps<FormValues>) => {
-        const { owner, name } = parseGitHubUrl(values.repoUrl);
-
+      {({
+        isValid,
+        isSubmitting,
+        errors,
+        touched,
+      }: FormikProps<FormValues>) => {
         return (
           <Form>
-            <div>
-              <label htmlFor="repoUrl">
-                GitHub Repository URL:
-              </label>
-              <Field
-                name="repoUrl"
-                type="url"
-                placeholder="https://github.com/owner/repo"
-              />
-            </div>
+            <CardRoot minW="40vw">
+              <CardBody>
+                <VStack gap={6} align="stretch">
+                  <Heading size="lg">Launch Your Game</Heading>
 
-            <div>
-              <label htmlFor="branch">
-                Branch:
-              </label>
-              <Field
-                name="branch"
-                type="text"
-                placeholder="main"
-              />
-            </div>
+                  <Field name="repoUrl">
+                    {({ field }: FieldProps<string, FormValues>) => (
+                      <ChakraField.Root
+                        required
+                        invalid={!!errors.repoUrl && touched.repoUrl}
+                      >
+                        <ChakraField.Label>
+                          GitHub Repository URL
+                        </ChakraField.Label>
+                        <Input
+                          {...field}
+                          type="url"
+                          placeholder="https://github.com/owner/repo"
+                        />
+                        <ChakraField.ErrorText>
+                          {errors.repoUrl}
+                        </ChakraField.ErrorText>
+                      </ChakraField.Root>
+                    )}
+                  </Field>
 
-            <div>
-              <label htmlFor="main">
-                Main (.wpgm) file:
-              </label>
-              <Field
-                name="main"
-                type="text"
-                placeholder="main"
-              />
-            </div>
+                  <Field name="branch">
+                    {({ field }: FieldProps<string, FormValues>) => (
+                      <ChakraField.Root
+                        required
+                        invalid={!!errors.branch && touched.branch}
+                      >
+                        <ChakraField.Label>Branch</ChakraField.Label>
+                        <Input {...field} type="text" placeholder="main" />
+                        <ChakraField.ErrorText>
+                          {errors.branch}
+                        </ChakraField.ErrorText>
+                      </ChakraField.Root>
+                    )}
+                  </Field>
 
-            {owner && name && (
-              <div>
-                <p>
-                  <strong>{owner}/{name}</strong>
-                </p>
-                <p>
-                  Main: <strong>{values.main}</strong>
-                </p>
-              </div>
-            )}
+                  <Field name="main">
+                    {({ field }: FieldProps<string, FormValues>) => (
+                      <ChakraField.Root
+                        required
+                        invalid={!!errors.main && touched.main}
+                      >
+                        <ChakraField.Label>Main (.wpgm) file</ChakraField.Label>
+                        <Input {...field} type="text" placeholder="main" />
+                        <ChakraField.ErrorText>
+                          {errors.main}
+                        </ChakraField.ErrorText>
+                      </ChakraField.Root>
+                    )}
+                  </Field>
 
-            <button 
-              type="submit"
-              disabled={!name || !owner || !values.branch}
-            >
-              Select Game
-            </button>
+                  <Button
+                    type="submit"
+                    disabled={!isValid || isSubmitting}
+                    colorPalette="brand"
+                    color="white"
+                    width="full"
+                  >
+                    Launch Game <BsRocketTakeoff />
+                  </Button>
+                </VStack>
+              </CardBody>
+            </CardRoot>
           </Form>
-        );
+        )
       }}
     </Formik>
-  );
+  )
 }
 
-export default PickGameForm;
+const validationSchema = Yup.object().shape({
+  repoUrl: Yup.string()
+    .required('Repository URL is required')
+    .url('Invalid URL')
+    .matches(
+      /^(https?:\/\/)?(www\.)?github\.com\/.+\/.+$/,
+      'Must be a valid GitHub repository URL'
+    ),
+  branch: Yup.string().required('Branch is required'),
+  main: Yup.string().required('Main file is required'),
+})
+
+const GITHUB_REPO_REGEX = /github\.com\/([^\/]+)\/([^\/]+)/
+
+const parseGitHubUrl = (url: string) => {
+  try {
+    const match = url.match(GITHUB_REPO_REGEX)
+
+    if (match) {
+      const owner = match[1]
+      const repo = match[2].replace(/\.git$/, '')
+      return { owner, name: repo }
+    }
+  } catch (error) {
+    return { owner: '', name: '' }
+  }
+  return { owner: '', name: '' }
+}
