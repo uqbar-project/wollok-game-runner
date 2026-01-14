@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/build/client/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/build/client/index.html"
+    }
+  ]
+}
